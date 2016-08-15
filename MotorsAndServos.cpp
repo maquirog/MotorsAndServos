@@ -32,6 +32,18 @@
 #include "SparkFun_pca9685_Edison.h"
 #include <iostream>
 #include <unistd.h>
+extern "C" {
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+}
+
+#include "Intel_Edison_BT_SPP.hpp"
+
+
 
 using namespace std;
 
@@ -41,7 +53,7 @@ using namespace std;
 int main()
 {
 
-
+	Intel_Edison_BT_SPP spp = Intel_Edison_BT_SPP();
 	tb6612 motors;
 	float i;
 	float j;
@@ -54,75 +66,99 @@ int main()
 	motors.standby(false);
 	pwm.enableServoMode();
 
+	spp.open();		// Open BT SPP
 
-	for (int k = 0; k < 2; k++)
-	{
-		for (j = 14; j >= 6; j-=0.01)
+	for (;;) {
+		//cout << "2" << endl;
+		//sleep(1);
+		ssize_t size = spp.read();
+		cout << size << endl;
+		if (size > 0 && size < 32)
 		{
-		  pwm.setChlDuty(SERVO,j);
-		  pwm.setChlDuty(1,j);
-		  cout<<j<<endl;
-		  usleep(20000);
+			cout << "2" << endl;
+			char * buf = spp.getBuf();
+			cout << buf[0] << ", " << buf[1] << ", "  << buf[2] << endl;
+			if (buf[0] == 'o' && buf[1] == 'n')
+			{
+				 motors.diffDrive(0.5,0.5);
+			}
+			if (buf[0] == 'o' && buf[1] == 'f' && buf[2] == 'f')
+			{
+				motors.diffDrive(0,0);
+			}
 		}
-		for (j = 6; j <= 14; j+=0.01)
-		{
-		  pwm.setChlDuty(SERVO,j);
-		  pwm.setChlDuty(1,j);
-		  cout<<j<<endl;
-		  usleep(2000);
-		}
-
-		for(i = 0; i < 1; i += 0.1)
-		{
-		  motors.diffDrive(i,i);
-		  usleep(500000);
-		}
-
-		for(i = 1; i > 0; i -= 0.1)
-		{
-		  motors.diffDrive(i,i);
-		  usleep(500000);
-		}
-
-		for(i = 0; i < 1; i += 0.1)
-		{
-		  motors.diffDrive(-i,-i);
-		  usleep(500000);
-		}
-
-		for(i = 1; i > 0; i -= 0.1)
-		{
-		  motors.diffDrive(-i,-i);
-		  usleep(500000);
-		}
-
-		motors.shortBrake(true, true);
 	}
 
-	motors.standby(true);
 
-	pwm.setChlDuty(SERVO,14);
-	pwm.setChlDuty(1,14);
 
-	bool brakeA = false;
-	bool brakeB = false;
-	float dcA = 0;
-	float dcB = 0;
-	bool onStandby = false;
-
-	onStandby = motors.getStandby();
-
-	motors.getDiffDrive(&dcA, &dcB);
-
-	motors.getShortBrake(&brakeA, &brakeB);
-
-	cout<<"Motor standby status: "<< boolalpha << onStandby << endl;
-	cout<<"Motor A brake status: "<< brakeA << endl;
-	cout<<"Motor B brake status: "<< brakeB << endl;
-	cout<<"Channel A speed: "<< fixed << setprecision(3)<<dcA<<endl;
-	cout<<"Channel B speed: "<<dcB<<endl;
-
-	cout<<"Servo demo complete!"<<endl;
+//	for (int k = 0; k < 2; k++)
+//	{
+//		for (j = 14; j >= 6; j-=0.01)
+//		{
+//		  pwm.setChlDuty(SERVO,j);
+//		  pwm.setChlDuty(1,j);
+//		  cout<<j<<endl;
+//		  usleep(20000);
+//		}
+//		for (j = 6; j <= 14; j+=0.01)
+//		{
+//		  pwm.setChlDuty(SERVO,j);
+//		  pwm.setChlDuty(1,j);
+//		  cout<<j<<endl;
+//		  usleep(2000);
+//		}
+//
+//		for(i = 0; i < 1; i += 0.1)
+//		{
+//		  motors.diffDrive(i,i);
+//		  usleep(500000);
+//		}
+//
+//		for(i = 1; i > 0; i -= 0.1)
+//		{
+//		  motors.diffDrive(i,i);
+//		  usleep(500000);
+//		}
+//
+//		for(i = 0; i < 1; i += 0.1)
+//		{
+//		  motors.diffDrive(-i,-i);
+//		  usleep(500000);
+//		}
+//
+//		for(i = 1; i > 0; i -= 0.1)
+//		{
+//		  motors.diffDrive(-i,-i);
+//		  usleep(500000);
+//		}
+//
+//		motors.shortBrake(true, true);
+//	}
+//
+//	motors.standby(true);
+//
+//	pwm.setChlDuty(SERVO,14);
+//	pwm.setChlDuty(1,14);
+//
+//	bool brakeA = false;
+//	bool brakeB = false;
+//	float dcA = 0;
+//	float dcB = 0;
+//	bool onStandby = false;
+//
+//	onStandby = motors.getStandby();
+//
+//	motors.getDiffDrive(&dcA, &dcB);
+//
+//	motors.getShortBrake(&brakeA, &brakeB);
+//
+//	cout<<"Motor standby status: "<< boolalpha << onStandby << endl;
+//	cout<<"Motor A brake status: "<< brakeA << endl;
+//	cout<<"Motor B brake status: "<< brakeB << endl;
+//	cout<<"Channel A speed: "<< fixed << setprecision(3)<<dcA<<endl;
+//	cout<<"Channel B speed: "<<dcB<<endl;
+//
+//	cout<<"Servo demo complete!"<<endl;
 
 
 	return MRAA_SUCCESS;
