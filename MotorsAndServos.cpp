@@ -43,20 +43,170 @@ extern "C" {
 
 #include "Intel_Edison_BT_SPP.hpp"
 
-
-
 using namespace std;
 
-// These channel definitions mirror the ones used in the PWM Block hookup guide.
-#define SERVO 0
+#define LEFT_UP_DOWN		(buf[0]=='0') && (buf[1]=='0')
+#define LEFT_FOLD_UNFOLD	(buf[0]=='0') && (buf[1]=='1')
+#define MOVE_LEFT			(buf[0]=='0') && (buf[1]=='2')
+#define HEAD_LEFT_RIGHT		(buf[0]=='0') && (buf[1]=='4')
+#define MOVE_FORWARD		(buf[0]=='0') && (buf[1]=='5')
+#define MOVE_STOP			(buf[0]=='0') && (buf[1]=='6')
+#define MOVE_BACKWARD		(buf[0]=='0') && (buf[1]=='7')
+#define RIGHT_UP_DOWN		(buf[0]=='0') && (buf[1]=='8')
+#define RIGHT_FOLD_UNFOLD	(buf[0]=='0') && (buf[1]=='9')
+#define MOVE_RIGHT			(buf[0]=='1') && (buf[1]=='0')
+#define RESET_ALL			(buf[0]=='1') && (buf[1]=='1')
+
+#define RIGHT_ELBOW			0
+#define RIGHT_ARM_FRONT		1
+#define RIGHT_ARM_BACK		2
+#define HEAD				3
+#define LEFT_ELBOW			4
+#define LEFT_ARM_FRONT		5
+#define LEFT_ARM_BACK		6
+
+
+
+void leftUpDown(pca9685 pwm){
+	static bool up = 0;
+	if(up){
+		cout << "leftUp" << endl;
+		pwm.setChlDuty(LEFT_ARM_FRONT,11.5);
+		pwm.setChlDuty(LEFT_ARM_BACK,11.5);
+		up = 0;
+	}else{
+		cout << "leftDown" << endl;
+		pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
+		pwm.setChlDuty(LEFT_ARM_BACK,5.5);
+		up = 1;
+	}
+}
+
+void leftFoldUnfold(pca9685 pwm){
+	static bool fold = 0;
+	if(fold){
+		cout << "leftFold" << endl;
+		pwm.setChlDuty(LEFT_ELBOW,11);
+		fold = 0;
+	}else{
+		cout << "leftUnfold" << endl;
+		pwm.setChlDuty(LEFT_ELBOW,5);
+		fold = 1;
+	}
+}
+
+void rightUpDown(pca9685 pwm){
+	static bool up = 0;
+	if(up){
+		cout << "rightUp" << endl;
+		pwm.setChlDuty(RIGHT_ARM_FRONT,6);
+		pwm.setChlDuty(RIGHT_ARM_BACK,6);
+		up = 0;
+	}
+	else{
+		cout << "rightDown" << endl;
+		pwm.setChlDuty(RIGHT_ARM_FRONT,12);
+		pwm.setChlDuty(RIGHT_ARM_BACK,12);
+		up = 1;
+	}
+}
+
+void rightFoldUnfold(pca9685 pwm){
+	static bool fold = 0;
+	if(fold){
+		cout << "rightFold" << endl;
+		pwm.setChlDuty(RIGHT_ELBOW,6);
+		fold = 0;
+	}else{
+		cout << "rightUnfold" << endl;
+		pwm.setChlDuty(RIGHT_ELBOW,13);
+		fold = 1;
+	}
+}
+
+void headLeftRight(pca9685 pwm){
+	static bool left = 0;
+	if(left){
+		cout << "headLeft" << endl;
+		pwm.setChlDuty(HEAD,14);
+		left = 0;
+	}else{
+		cout << "headRight" << endl;
+		pwm.setChlDuty(HEAD,4);
+		left = 1;
+	}
+}
+
+void moveForward(tb6612 motors){
+	cout << "moveForward" << endl;
+	motors.diffDrive(0.7,0.7);
+}
+
+void moveBackward(tb6612 motors){
+	cout << "moveBackward" << endl;
+	motors.diffDrive(-0.7,-0.7);
+}
+
+void moveStop(tb6612 motors){
+	cout << "moveStop" << endl;
+	motors.diffDrive(0,0);
+}
+
+void moveLeft(tb6612 motors){
+	cout << "moveLeft" << endl;
+	motors.diffDrive(-0.7,0.7);
+}
+
+void moveRight(tb6612 motors){
+	cout << "moveRight" << endl;
+	motors.diffDrive(0.7,-0.7);
+}
+
+void resetAll(pca9685 pwm,tb6612 motors){
+	cout << "resetAll" << endl;
+	pwm.setChlDuty(HEAD,10);
+	moveStop(motors);
+	pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
+	pwm.setChlDuty(LEFT_ARM_BACK,5.5);
+	pwm.setChlDuty(LEFT_ELBOW,5);
+	pwm.setChlDuty(RIGHT_ARM_FRONT,12);
+	pwm.setChlDuty(RIGHT_ARM_BACK,12);
+	pwm.setChlDuty(RIGHT_ELBOW,13);
+}
+
+void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
+	if(LEFT_UP_DOWN){
+		leftUpDown(pwm);
+	}else if(LEFT_FOLD_UNFOLD){
+		leftFoldUnfold(pwm);
+	}else if(HEAD_LEFT_RIGHT){
+		headLeftRight(pwm);
+	}else if(MOVE_FORWARD){
+		moveForward(motors);
+	}else if(MOVE_LEFT){
+		moveLeft(motors);
+	}else if(MOVE_STOP){
+		moveStop(motors);
+	}else if(MOVE_RIGHT){
+		moveRight(motors);
+	}else if(MOVE_BACKWARD){
+		moveBackward(motors);
+	}else if(RIGHT_UP_DOWN){
+		rightUpDown(pwm);
+	}else if(RIGHT_FOLD_UNFOLD){
+		rightFoldUnfold(pwm);
+	}else if(RESET_ALL){
+		resetAll(pwm,motors);
+	}else{
+		cout << "Nothing" << endl;
+	}
+}
 
 int main()
 {
 
 	Intel_Edison_BT_SPP spp = Intel_Edison_BT_SPP();
 	tb6612 motors;
-	float i;
-	float j;
 
 	mraa::I2c* pwm_i2c;
 	pwm_i2c = new mraa::I2c(1); // Tell the I2c object which bus it's on.
@@ -65,12 +215,11 @@ int main()
 
 	motors.standby(false);
 	pwm.enableServoMode();
-
+	cout << "1" << endl;
 	spp.open();		// Open BT SPP
 
+	cout << "Here" << endl;
 	for (;;) {
-		//cout << "2" << endl;
-		//sleep(1);
 		ssize_t size = spp.read();
 		cout << size << endl;
 		if (size > 0 && size < 32)
@@ -78,87 +227,10 @@ int main()
 			cout << "2" << endl;
 			char * buf = spp.getBuf();
 			cout << buf[0] << ", " << buf[1] << ", "  << buf[2] << endl;
-			if (buf[0] == 'o' && buf[1] == 'n')
-			{
-				 motors.diffDrive(0.5,0.5);
-			}
-			if (buf[0] == 'o' && buf[1] == 'f' && buf[2] == 'f')
-			{
-				motors.diffDrive(0,0);
-			}
+			moveSomething(buf,pwm,motors);
+
 		}
 	}
-
-
-
-//	for (int k = 0; k < 2; k++)
-//	{
-//		for (j = 14; j >= 6; j-=0.01)
-//		{
-//		  pwm.setChlDuty(SERVO,j);
-//		  pwm.setChlDuty(1,j);
-//		  cout<<j<<endl;
-//		  usleep(20000);
-//		}
-//		for (j = 6; j <= 14; j+=0.01)
-//		{
-//		  pwm.setChlDuty(SERVO,j);
-//		  pwm.setChlDuty(1,j);
-//		  cout<<j<<endl;
-//		  usleep(2000);
-//		}
-//
-//		for(i = 0; i < 1; i += 0.1)
-//		{
-//		  motors.diffDrive(i,i);
-//		  usleep(500000);
-//		}
-//
-//		for(i = 1; i > 0; i -= 0.1)
-//		{
-//		  motors.diffDrive(i,i);
-//		  usleep(500000);
-//		}
-//
-//		for(i = 0; i < 1; i += 0.1)
-//		{
-//		  motors.diffDrive(-i,-i);
-//		  usleep(500000);
-//		}
-//
-//		for(i = 1; i > 0; i -= 0.1)
-//		{
-//		  motors.diffDrive(-i,-i);
-//		  usleep(500000);
-//		}
-//
-//		motors.shortBrake(true, true);
-//	}
-//
-//	motors.standby(true);
-//
-//	pwm.setChlDuty(SERVO,14);
-//	pwm.setChlDuty(1,14);
-//
-//	bool brakeA = false;
-//	bool brakeB = false;
-//	float dcA = 0;
-//	float dcB = 0;
-//	bool onStandby = false;
-//
-//	onStandby = motors.getStandby();
-//
-//	motors.getDiffDrive(&dcA, &dcB);
-//
-//	motors.getShortBrake(&brakeA, &brakeB);
-//
-//	cout<<"Motor standby status: "<< boolalpha << onStandby << endl;
-//	cout<<"Motor A brake status: "<< brakeA << endl;
-//	cout<<"Motor B brake status: "<< brakeB << endl;
-//	cout<<"Channel A speed: "<< fixed << setprecision(3)<<dcA<<endl;
-//	cout<<"Channel B speed: "<<dcB<<endl;
-//
-//	cout<<"Servo demo complete!"<<endl;
 
 
 	return MRAA_SUCCESS;
