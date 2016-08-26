@@ -67,8 +67,9 @@ using namespace std;
 
 
 
-void leftUpDown(pca9685 pwm){
+void leftUpDown(pca9685 pwm, tb6612 motors){
 	static bool up = 0;
+	motors.standby(true);
 	if(up){
 		cout << "leftUp" << endl;
 		pwm.setChlDuty(LEFT_ARM_FRONT,11.5);
@@ -82,8 +83,9 @@ void leftUpDown(pca9685 pwm){
 	}
 }
 
-void leftFoldUnfold(pca9685 pwm){
+void leftFoldUnfold(pca9685 pwm, tb6612 motors){
 	static bool fold = 0;
+	motors.standby(true);
 	if(fold){
 		cout << "leftFold" << endl;
 		pwm.setChlDuty(LEFT_ELBOW,11);
@@ -95,8 +97,9 @@ void leftFoldUnfold(pca9685 pwm){
 	}
 }
 
-void rightUpDown(pca9685 pwm){
+void rightUpDown(pca9685 pwm, tb6612 motors){
 	static bool up = 0;
+	motors.standby(true);
 	if(up){
 		cout << "rightUp" << endl;
 		pwm.setChlDuty(RIGHT_ARM_FRONT,6);
@@ -111,8 +114,9 @@ void rightUpDown(pca9685 pwm){
 	}
 }
 
-void rightFoldUnfold(pca9685 pwm){
+void rightFoldUnfold(pca9685 pwm, tb6612 motors){
 	static bool fold = 0;
+	motors.standby(true);
 	if(fold){
 		cout << "rightFold" << endl;
 		pwm.setChlDuty(RIGHT_ELBOW,6);
@@ -124,8 +128,9 @@ void rightFoldUnfold(pca9685 pwm){
 	}
 }
 
-void headLeftRight(pca9685 pwm){
+void headLeftRight(pca9685 pwm, tb6612 motors){
 	static bool left = 0;
+	motors.standby(true);
 	if(left){
 		cout << "headLeft" << endl;
 		pwm.setChlDuty(HEAD,14);
@@ -137,64 +142,83 @@ void headLeftRight(pca9685 pwm){
 	}
 }
 
-void moveForward(tb6612 motors){
+void servosStop(pca9685 pwm){
+	cout << "servosStop" << endl;
+	pwm.setChlStop(LEFT_ARM_FRONT, 0);
+	pwm.setChlStop(LEFT_ARM_BACK, 0);
+	pwm.setChlStop(LEFT_ELBOW, 0);
+	pwm.setChlStop(RIGHT_ARM_FRONT, 0);
+	pwm.setChlStop(RIGHT_ARM_BACK, 0);
+	pwm.setChlStop(RIGHT_ELBOW, 0);
+	pwm.setChlStop(HEAD, 0);
+}
+
+void moveForward(pca9685 pwm, tb6612 motors){
 	cout << "moveForward" << endl;
+	servosStop(pwm);
+	motors.standby(false);
 	motors.diffDrive(0.7,0.7);
 }
 
-void moveBackward(tb6612 motors){
+void moveBackward(pca9685 pwm, tb6612 motors){
 	cout << "moveBackward" << endl;
+	servosStop(pwm);
+	motors.standby(false);
 	motors.diffDrive(-0.7,-0.7);
 }
 
 void moveStop(tb6612 motors){
 	cout << "moveStop" << endl;
-	motors.diffDrive(0,0);
+	motors.standby(true);
 }
 
-void moveLeft(tb6612 motors){
+void moveLeft(pca9685 pwm, tb6612 motors){
 	cout << "moveLeft" << endl;
+	servosStop(pwm);
+	motors.standby(false);
 	motors.diffDrive(-0.7,0.7);
 }
 
-void moveRight(tb6612 motors){
+void moveRight(pca9685 pwm, tb6612 motors){
 	cout << "moveRight" << endl;
+	servosStop(pwm);
+	motors.standby(false);
 	motors.diffDrive(0.7,-0.7);
 }
 
 void resetAll(pca9685 pwm,tb6612 motors){
 	cout << "resetAll" << endl;
-	pwm.setChlDuty(HEAD,10);
+	servosStop(pwm);
 	moveStop(motors);
-	pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
-	pwm.setChlDuty(LEFT_ARM_BACK,5.5);
-	pwm.setChlDuty(LEFT_ELBOW,5);
-	pwm.setChlDuty(RIGHT_ARM_FRONT,12);
-	pwm.setChlDuty(RIGHT_ARM_BACK,12);
-	pwm.setChlDuty(RIGHT_ELBOW,13);
+//	pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
+//	pwm.setChlDuty(LEFT_ARM_BACK,5.5);
+//	pwm.setChlDuty(LEFT_ELBOW,5);
+//	pwm.setChlDuty(RIGHT_ARM_FRONT,12);
+//	pwm.setChlDuty(RIGHT_ARM_BACK,12);
+//	pwm.setChlDuty(RIGHT_ELBOW,13);
 }
 
 void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
 	if(LEFT_UP_DOWN){
-		leftUpDown(pwm);
+		leftUpDown(pwm, motors);
 	}else if(LEFT_FOLD_UNFOLD){
-		leftFoldUnfold(pwm);
+		leftFoldUnfold(pwm, motors);
 	}else if(HEAD_LEFT_RIGHT){
-		headLeftRight(pwm);
+		headLeftRight(pwm, motors);
 	}else if(MOVE_FORWARD){
-		moveForward(motors);
+		moveForward(pwm, motors);
 	}else if(MOVE_LEFT){
-		moveLeft(motors);
+		moveLeft(pwm, motors);
 	}else if(MOVE_STOP){
 		moveStop(motors);
 	}else if(MOVE_RIGHT){
-		moveRight(motors);
+		moveRight(pwm, motors);
 	}else if(MOVE_BACKWARD){
-		moveBackward(motors);
+		moveBackward(pwm, motors);
 	}else if(RIGHT_UP_DOWN){
-		rightUpDown(pwm);
+		rightUpDown(pwm, motors);
 	}else if(RIGHT_FOLD_UNFOLD){
-		rightFoldUnfold(pwm);
+		rightFoldUnfold(pwm, motors);
 	}else if(RESET_ALL){
 		resetAll(pwm,motors);
 	}else{
