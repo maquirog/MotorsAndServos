@@ -65,10 +65,10 @@ using namespace std;
 #define LEFT_ARM_FRONT		5
 #define LEFT_ARM_BACK		6
 
-
+#define US_DELAY			500000
 
 void leftUpDown(pca9685 pwm, tb6612 motors){
-	static bool up = 0;
+	static bool up = 1;
 	motors.standby(true);
 	if(up){
 		cout << "leftUp" << endl;
@@ -84,7 +84,7 @@ void leftUpDown(pca9685 pwm, tb6612 motors){
 }
 
 void leftFoldUnfold(pca9685 pwm, tb6612 motors){
-	static bool fold = 0;
+	static bool fold = 1;
 	motors.standby(true);
 	if(fold){
 		cout << "leftFold" << endl;
@@ -98,7 +98,7 @@ void leftFoldUnfold(pca9685 pwm, tb6612 motors){
 }
 
 void rightUpDown(pca9685 pwm, tb6612 motors){
-	static bool up = 0;
+	static bool up = 1;
 	motors.standby(true);
 	if(up){
 		cout << "rightUp" << endl;
@@ -115,7 +115,7 @@ void rightUpDown(pca9685 pwm, tb6612 motors){
 }
 
 void rightFoldUnfold(pca9685 pwm, tb6612 motors){
-	static bool fold = 0;
+	static bool fold = 1;
 	motors.standby(true);
 	if(fold){
 		cout << "rightFold" << endl;
@@ -144,6 +144,24 @@ void headLeftRight(pca9685 pwm, tb6612 motors){
 
 void servosStop(pca9685 pwm){
 	cout << "servosStop" << endl;
+//	pwm.setChlStop(LEFT_ARM_FRONT, 0);
+//	pwm.setChlStop(LEFT_ARM_BACK, 0);
+//	pwm.setChlStop(LEFT_ELBOW, 0);
+//	pwm.setChlStop(RIGHT_ARM_FRONT, 0);
+//	pwm.setChlStop(RIGHT_ARM_BACK, 0);
+//	pwm.setChlStop(RIGHT_ELBOW, 0);
+//	pwm.setChlStop(HEAD, 0);
+
+	pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
+	pwm.setChlDuty(LEFT_ARM_BACK,5.5);
+	pwm.setChlDuty(LEFT_ELBOW,5);
+	pwm.setChlDuty(RIGHT_ARM_FRONT,12);
+	pwm.setChlDuty(RIGHT_ARM_BACK,12);
+	pwm.setChlDuty(RIGHT_ELBOW,13);
+}
+
+void servosSteady(pca9685 pwm){
+	cout << "servosStop" << endl;
 	pwm.setChlStop(LEFT_ARM_FRONT, 0);
 	pwm.setChlStop(LEFT_ARM_BACK, 0);
 	pwm.setChlStop(LEFT_ELBOW, 0);
@@ -151,11 +169,19 @@ void servosStop(pca9685 pwm){
 	pwm.setChlStop(RIGHT_ARM_BACK, 0);
 	pwm.setChlStop(RIGHT_ELBOW, 0);
 	pwm.setChlStop(HEAD, 0);
+
+//	pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
+//	pwm.setChlDuty(LEFT_ARM_BACK,5.5);
+//	pwm.setChlDuty(LEFT_ELBOW,5);
+//	pwm.setChlDuty(RIGHT_ARM_FRONT,12);
+//	pwm.setChlDuty(RIGHT_ARM_BACK,12);
+//	pwm.setChlDuty(RIGHT_ELBOW,13);
 }
 
 void moveForward(pca9685 pwm, tb6612 motors){
 	cout << "moveForward" << endl;
 	servosStop(pwm);
+	usleep(US_DELAY);
 	motors.standby(false);
 	motors.diffDrive(0.7,0.7);
 }
@@ -163,6 +189,7 @@ void moveForward(pca9685 pwm, tb6612 motors){
 void moveBackward(pca9685 pwm, tb6612 motors){
 	cout << "moveBackward" << endl;
 	servosStop(pwm);
+	usleep(US_DELAY);
 	motors.standby(false);
 	motors.diffDrive(-0.7,-0.7);
 }
@@ -175,6 +202,7 @@ void moveStop(tb6612 motors){
 void moveLeft(pca9685 pwm, tb6612 motors){
 	cout << "moveLeft" << endl;
 	servosStop(pwm);
+	usleep(US_DELAY);
 	motors.standby(false);
 	motors.diffDrive(-0.7,0.7);
 }
@@ -182,47 +210,86 @@ void moveLeft(pca9685 pwm, tb6612 motors){
 void moveRight(pca9685 pwm, tb6612 motors){
 	cout << "moveRight" << endl;
 	servosStop(pwm);
+	usleep(US_DELAY);
 	motors.standby(false);
 	motors.diffDrive(0.7,-0.7);
 }
 
 void resetAll(pca9685 pwm,tb6612 motors){
 	cout << "resetAll" << endl;
-	servosStop(pwm);
+	servosSteady(pwm);
 	moveStop(motors);
-//	pwm.setChlDuty(LEFT_ARM_FRONT,5.5);
-//	pwm.setChlDuty(LEFT_ARM_BACK,5.5);
-//	pwm.setChlDuty(LEFT_ELBOW,5);
-//	pwm.setChlDuty(RIGHT_ARM_FRONT,12);
-//	pwm.setChlDuty(RIGHT_ARM_BACK,12);
-//	pwm.setChlDuty(RIGHT_ELBOW,13);
 }
 
 void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
-	if(LEFT_UP_DOWN){
-		leftUpDown(pwm, motors);
-	}else if(LEFT_FOLD_UNFOLD){
-		leftFoldUnfold(pwm, motors);
-	}else if(HEAD_LEFT_RIGHT){
-		headLeftRight(pwm, motors);
-	}else if(MOVE_FORWARD){
-		moveForward(pwm, motors);
-	}else if(MOVE_LEFT){
-		moveLeft(pwm, motors);
-	}else if(MOVE_STOP){
-		moveStop(motors);
-	}else if(MOVE_RIGHT){
-		moveRight(pwm, motors);
-	}else if(MOVE_BACKWARD){
-		moveBackward(pwm, motors);
-	}else if(RIGHT_UP_DOWN){
-		rightUpDown(pwm, motors);
-	}else if(RIGHT_FOLD_UNFOLD){
-		rightFoldUnfold(pwm, motors);
-	}else if(RESET_ALL){
-		resetAll(pwm,motors);
-	}else{
-		cout << "Nothing" << endl;
+	static bool speak = 0;
+	if(!speak){
+		if(LEFT_UP_DOWN){
+			leftUpDown(pwm, motors);
+		}else if(LEFT_FOLD_UNFOLD){
+			leftFoldUnfold(pwm, motors);
+		}else if(HEAD_LEFT_RIGHT){
+			headLeftRight(pwm, motors);
+		}else if(MOVE_FORWARD){
+			moveForward(pwm, motors);
+		}else if(MOVE_LEFT){
+			moveLeft(pwm, motors);
+		}else if(MOVE_STOP){
+			moveStop(motors);
+		}else if(MOVE_RIGHT){
+			moveRight(pwm, motors);
+		}else if(MOVE_BACKWARD){
+			moveBackward(pwm, motors);
+		}else if(RIGHT_UP_DOWN){
+			rightUpDown(pwm, motors);
+		}else if(RIGHT_FOLD_UNFOLD){
+			rightFoldUnfold(pwm, motors);
+		}else if(RESET_ALL){
+			resetAll(pwm,motors);
+		}else{
+			speak = 1;
+			resetAll(pwm,motors);
+			system("aplay music.wav");
+			cout << "Nothing" << endl;
+		}
+	}
+	else
+	{
+		if(LEFT_UP_DOWN){
+			system("espeak -v es-la Hola,_bienvenidos_al_laboratorio_de_pymes");
+//			rightFoldUnfold(pwm,motors);
+//			sleep(1);
+//			rightFoldUnfold(pwm,motors);
+		}else if(LEFT_FOLD_UNFOLD){
+			system("espeak -v es-la Como_estas?");
+//			headLeftRight(pwm,motors);
+//			sleep(1);
+//			headLeftRight(pwm,motors);
+		}else if(HEAD_LEFT_RIGHT){
+			system("espeak -v es-la Esa_es_una_excelente_pregunta?");
+//			headLeftRight(pwm,motors);
+//			sleep(1);
+//			headLeftRight(pwm,motors);		}else if(MOVE_FORWARD){
+		}else if(MOVE_FORWARD){
+			system("espeak -v es-la Muy_bien_y_tu?");
+		}else if(MOVE_LEFT){
+			system("espeak -v es-la 2314567890");
+		}else if(MOVE_STOP){
+			system("espeak -v es-la Mario_es_mi_creador?");
+		}else if(MOVE_RIGHT){
+			system("espeak -v es-la Tu_tambien");
+		}else if(MOVE_BACKWARD){
+			system("espeak -v es-la Tambien_bien,_gracias");
+		}else if(RIGHT_UP_DOWN){
+			system("espeak -v es-la Hola,_como_estas?");
+		}else if(RIGHT_FOLD_UNFOLD){
+			system("espeak -v es-la Hola,_como_estas?");
+		}else if(RESET_ALL){
+			resetAll(pwm,motors);
+		}else{
+			speak = 0;
+			cout << "Nothing" << endl;
+		}
 	}
 }
 
