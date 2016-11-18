@@ -249,41 +249,89 @@ void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
 		}else{
 			speak = 1;
 			resetAll(pwm,motors);
-			system("aplay music.wav");
+//			system("aplay music.wav");
 			cout << "Nothing" << endl;
 		}
 	}
 	else
 	{
 		if(LEFT_UP_DOWN){
-			system("espeak -v es-la Hola,_bienvenidos_al_laboratorio_de_pymes");
-//			rightFoldUnfold(pwm,motors);
-//			sleep(1);
-//			rightFoldUnfold(pwm,motors);
+//			system("espeak -v en-sc I_am_just_a_robot,_I_dont_have_the_answer_to_that_question");
+//			leftUpDown(pwm, motors);
+//			leftFoldUnfold(pwm, motors);
+//			headLeftRight(pwm, motors);
+//			moveForward(pwm, motors);
+//			moveLeft(pwm, motors);
+//			moveStop(motors);
+//			moveRight(pwm, motors);
+//			moveBackward(pwm, motors);
+//			rightUpDown(pwm, motors);
+//			rightFoldUnfold(pwm, motors);
+
+			resetAll(pwm,motors);
+			usleep(250000);
+			headLeftRight(pwm, motors);
+			usleep(250000);
+			rightFoldUnfold(pwm, motors);
+			usleep(250000);
+			system("espeak -v es-la 'Hola a todos, bienvenidos a Intel'");
+			rightFoldUnfold(pwm, motors);
+			usleep(250000);
+			moveRight(pwm, motors);
+			usleep(250000);
+			moveLeft(pwm, motors);
+			usleep(500000);
+			moveStop(motors);
+			system("espeak -v es-la 'Como pueden ver, por lo que traigo en el pecho'");
+			leftFoldUnfold(pwm, motors);
+			usleep(500000);
+			leftFoldUnfold(pwm, motors);
+			usleep(500000);
+			system("espeak -v es-la 'Yo funciono con la plataforma Intel Édison, que es una de las tantas cosas que hacemos en Intel'");
+			headLeftRight(pwm, motors);
+			usleep(500000);
+			headLeftRight(pwm, motors);
+			usleep(250000);
+			system("espeak -v es-la 'Espero que les guste el recorrido tanto como a mí'");
+			moveRight(pwm, motors);
+			usleep(250000);
+			moveLeft(pwm, motors);
+			usleep(500000);
+			moveStop(motors);
+			system("espeak -v es-la 'Por lo pronto, le cederé la palabra a mis compañeros humanos'");
 		}else if(LEFT_FOLD_UNFOLD){
-			system("espeak -v es-la Como_estas?");
+//			system("espeak -v en-sc Hello");
+//			system("espeak -v es-la Como_estas?");
 //			headLeftRight(pwm,motors);
 //			sleep(1);
 //			headLeftRight(pwm,motors);
 		}else if(HEAD_LEFT_RIGHT){
-			system("espeak -v es-la Esa_es_una_excelente_pregunta?");
+//			system("espeak -v en-sc Welcome_to_Intel");
+//			system("espeak -v es-la Esa_es_una_excelente_pregunta?");
 //			headLeftRight(pwm,motors);
 //			sleep(1);
 //			headLeftRight(pwm,motors);		}else if(MOVE_FORWARD){
 		}else if(MOVE_FORWARD){
-			system("espeak -v es-la Muy_bien_y_tu?");
+//			system("espeak -v en-sc Welcome_to_the_museum");
+//			system("espeak -v es-la Muy_bien_y_tu?");
 		}else if(MOVE_LEFT){
-			system("espeak -v es-la 2314567890");
+//			system("espeak -v en-sc We_are_very_happy_to_have_you_here");
+//			system("espeak -v es-la 2314567890");
 		}else if(MOVE_STOP){
-			system("espeak -v es-la Mario_es_mi_creador?");
+//			system("espeak -v en-sc How_are_you?");
+//			system("espeak -v es-la Mario_es_mi_creador?");
 		}else if(MOVE_RIGHT){
-			system("espeak -v es-la Tu_tambien");
+//			system("espeak -v en-sc Fine,_thank_you");
+//			system("espeak -v es-la Tu_tambien");
 		}else if(MOVE_BACKWARD){
-			system("espeak -v es-la Tambien_bien,_gracias");
+//			system("espeak -v en-sc I_hope_you_enjoy_the_tour");
+//			system("espeak -v es-la Tambien_bien,_gracias");
 		}else if(RIGHT_UP_DOWN){
-			system("espeak -v es-la Hola,_como_estas?");
+//			system("aplay music.wav");
+//			system("espeak -v es-la Hola,_como_estas?");
 		}else if(RIGHT_FOLD_UNFOLD){
-			system("espeak -v es-la Hola,_como_estas?");
+//			system("aplay music.wav");
+//			system("espeak -v es-la Hola,_como_estas?");
 		}else if(RESET_ALL){
 			resetAll(pwm,motors);
 		}else{
