@@ -67,6 +67,42 @@ using namespace std;
 
 #define US_DELAY			500000
 
+#define T_TIME				500000
+
+mraa::Gpio* d_pin_1 = NULL;
+mraa::Gpio* d_pin_2 = NULL;
+mraa::Gpio* d_pin_3 = NULL;
+
+void LEDOne(){
+	d_pin_1->write(1);
+	d_pin_2->write(0);
+	d_pin_3->write(0);
+}
+
+void LEDTwo(){
+	d_pin_1->write(0);
+	d_pin_2->write(1);
+	d_pin_3->write(0);
+}
+
+void LEDThree(){
+	d_pin_1->write(0);
+	d_pin_2->write(0);
+	d_pin_3->write(1);
+}
+
+void LEDAllOn(){
+	d_pin_1->write(1);
+	d_pin_2->write(1);
+	d_pin_3->write(1);
+}
+
+void LEDAllOff(){
+	d_pin_1->write(0);
+	d_pin_2->write(0);
+	d_pin_3->write(0);
+}
+
 void leftUpDown(pca9685 pwm, tb6612 motors){
 	static bool up = 1;
 	motors.standby(true);
@@ -222,8 +258,9 @@ void resetAll(pca9685 pwm,tb6612 motors){
 }
 
 void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
-	static bool speak = 0;
+	static int speak = 0;
 	if(!speak){
+		LEDOne();
 		if(LEFT_UP_DOWN){
 			leftUpDown(pwm, motors);
 		}else if(LEFT_FOLD_UNFOLD){
@@ -248,6 +285,7 @@ void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
 			resetAll(pwm,motors);
 		}else{
 			speak = 1;
+			LEDTwo();
 			resetAll(pwm,motors);
 //			system("aplay music.wav");
 			cout << "Nothing" << endl;
@@ -274,78 +312,200 @@ void moveSomething(char *buf, pca9685 pwm, tb6612 motors){
 			usleep(250000);
 			rightFoldUnfold(pwm, motors);
 			usleep(250000);
-			system("espeak -v es-la 'Hola a todos, bienvenidos a Intel'");
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Hola a todos, bienvenidos a Intel'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'Hello everybody, welcome to Intel'");
 			rightFoldUnfold(pwm, motors);
 			usleep(250000);
 			moveRight(pwm, motors);
 			usleep(250000);
 			moveLeft(pwm, motors);
-			usleep(500000);
+			usleep(750000);
 			moveStop(motors);
-			system("espeak -v es-la 'Como pueden ver, por lo que traigo en el pecho'");
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Como pueden ver, por lo que traigo en el pecho'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'As you can see for what I have in my chest'");
 			leftFoldUnfold(pwm, motors);
+			usleep(500000);
+			LEDAllOn();
+			usleep(500000);
+			LEDAllOff();
+			usleep(500000);
+			LEDAllOn();
+			usleep(500000);
+			LEDAllOff();
+			usleep(500000);
+			LEDAllOn();
+			usleep(500000);
+			LEDAllOff();
+			usleep(500000);
+			LEDAllOn();
+			usleep(500000);
+			LEDTwo();
 			usleep(500000);
 			leftFoldUnfold(pwm, motors);
 			usleep(500000);
-			system("espeak -v es-la 'Yo funciono con la plataforma Intel Édison, que es una de las tantas cosas que hacemos en Intel'");
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Yo funciono con la plataforma Intel Édison, que es una de las tantas cosas que hacemos en Intel'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'I work with the Intel Edison platform, which is one of the so many things that we do at Intel'");
 			headLeftRight(pwm, motors);
 			usleep(500000);
 			headLeftRight(pwm, motors);
 			usleep(250000);
-			system("espeak -v es-la 'Espero que les guste el recorrido tanto como a mí'");
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Espero que les guste el recorrido tanto como a mí'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'I hope you enjoy the tour as much as I do'");
 			moveRight(pwm, motors);
 			usleep(250000);
 			moveLeft(pwm, motors);
-			usleep(500000);
+			usleep(750000);
 			moveStop(motors);
-			system("espeak -v es-la 'Por lo pronto, le cederé la palabra a mis compañeros humanos'");
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Por lo pronto, le cederé la palabra a mis compañeros humanos'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'Meanwhile, I will let my human fellows continue to speak'");
 		}else if(LEFT_FOLD_UNFOLD){
-//			system("espeak -v en-sc Hello");
-//			system("espeak -v es-la Como_estas?");
-//			headLeftRight(pwm,motors);
-//			sleep(1);
-//			headLeftRight(pwm,motors);
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'No, gracias a ti' &");
+			else
+				system("espeak -v en-us -a 200 -s 150 'No, thank you' &");
+			leftFoldUnfold(pwm, motors);
+			usleep(T_TIME + T_TIME + T_TIME);
+			leftFoldUnfold(pwm, motors);
 		}else if(HEAD_LEFT_RIGHT){
-//			system("espeak -v en-sc Welcome_to_Intel");
-//			system("espeak -v es-la Esa_es_una_excelente_pregunta?");
-//			headLeftRight(pwm,motors);
-//			sleep(1);
-//			headLeftRight(pwm,motors);		}else if(MOVE_FORWARD){
+			system("aplay roboto_short.wav &");
+			usleep(T_TIME);
+			headLeftRight(pwm, motors);
+			LEDAllOn();
+			usleep(T_TIME);
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+			leftUpDown(pwm, motors);
+			rightUpDown(pwm, motors);
+			LEDAllOff();
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			LEDAllOn();
+			usleep(T_TIME);
+			rightFoldUnfold(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			LEDAllOff();
+			usleep(T_TIME);
+			leftUpDown(pwm, motors);
+			rightUpDown(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+
+			moveRight(pwm, motors);
+			usleep(T_TIME + T_TIME);
+			moveLeft(pwm, motors);
+			usleep(T_TIME + T_TIME + T_TIME);
+			moveStop(motors);
+
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			usleep(T_TIME);
+			leftUpDown(pwm, motors);
+			rightUpDown(pwm, motors);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+			headLeftRight(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			rightFoldUnfold(pwm, motors);
+			usleep(T_TIME);
+			leftFoldUnfold(pwm, motors);
+			leftUpDown(pwm, motors);
+			rightUpDown(pwm, motors);
+			usleep(T_TIME + T_TIME);
+			resetAll(pwm,motors);
 		}else if(MOVE_FORWARD){
-//			system("espeak -v en-sc Welcome_to_the_museum");
-//			system("espeak -v es-la Muy_bien_y_tu?");
+
 		}else if(MOVE_LEFT){
-//			system("espeak -v en-sc We_are_very_happy_to_have_you_here");
-//			system("espeak -v es-la 2314567890");
+
 		}else if(MOVE_STOP){
-//			system("espeak -v en-sc How_are_you?");
-//			system("espeak -v es-la Mario_es_mi_creador?");
+
 		}else if(MOVE_RIGHT){
-//			system("espeak -v en-sc Fine,_thank_you");
-//			system("espeak -v es-la Tu_tambien");
+
 		}else if(MOVE_BACKWARD){
-//			system("espeak -v en-sc I_hope_you_enjoy_the_tour");
-//			system("espeak -v es-la Tambien_bien,_gracias");
+
 		}else if(RIGHT_UP_DOWN){
-//			system("aplay music.wav");
-//			system("espeak -v es-la Hola,_como_estas?");
+			headLeftRight(pwm, motors);
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Mario es mi creador'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'Mario is my creator'");
+			if(speak == 1)
+				system("espeak -v es-la -a 200 'Es muy inteligente, guapo, capaz y sobre todo modesto'");
+			else
+				system("espeak -v en-us -a 200 -s 150 'He is very intelligent, handsome, capable and most of all modest'");
+			headLeftRight(pwm, motors);
 		}else if(RIGHT_FOLD_UNFOLD){
-//			system("aplay music.wav");
-//			system("espeak -v es-la Hola,_como_estas?");
+			system("espeak -v es-la -a 200 'Fierro, pariente. Echele viejón' &");
+			leftFoldUnfold(pwm, motors);
+			usleep(T_TIME + T_TIME + T_TIME + T_TIME + T_TIME + T_TIME);
+			leftFoldUnfold(pwm, motors);
 		}else if(RESET_ALL){
 			resetAll(pwm,motors);
 		}else{
-			speak = 0;
-			cout << "Nothing" << endl;
+			if(speak == 1){
+				speak = 2;
+				LEDThree();
+			}
+			else{
+				speak = 0;
+				LEDOne();
+			}
+		cout << "Nothing" << endl;
 		}
+
+		if(speak == 0)
+			LEDOne();
+		else if(speak == 1)
+			LEDTwo();
+		else
+			LEDThree();
+
 	}
 }
 
 int main()
 {
-
 	Intel_Edison_BT_SPP spp = Intel_Edison_BT_SPP();
 	tb6612 motors;
+
+	d_pin_1 = new mraa::Gpio(4, true, false);
+	d_pin_2 = new mraa::Gpio(26, true, false);
+	d_pin_3 = new mraa::Gpio(33, true, false);
+
+	d_pin_1->dir(mraa::DIR_OUT);
+	d_pin_2->dir(mraa::DIR_OUT);
+	d_pin_3->dir(mraa::DIR_OUT);
 
 	mraa::I2c* pwm_i2c;
 	pwm_i2c = new mraa::I2c(1); // Tell the I2c object which bus it's on.
@@ -358,6 +518,7 @@ int main()
 	spp.open();		// Open BT SPP
 
 	cout << "Here" << endl;
+	resetAll(pwm,motors);
 	for (;;) {
 		ssize_t size = spp.read();
 		cout << size << endl;
@@ -374,9 +535,6 @@ int main()
 
 	return MRAA_SUCCESS;
 }
-
-
-
 
 
 
